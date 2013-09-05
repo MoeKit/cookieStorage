@@ -1,5 +1,7 @@
 #CookieStorage
 
+[![Build Status](https://travis-ci.org/airyland/seedit.cookieStorage.png?branch=master)](https://travis-ci.org/airyland/seedit.cookieStorage)
+
 Often when you save data into cookies it uses up a small amount of data. Since a cookie can use up to 4096 bytes, the majority of the space is wasted! Also, as a general rule of thumb, a domain can have a maximum of 20 cookies. But what if that isn't enough?
 
 CookieStorage solves these problems by efficiently using the maximum size of a single cookie and packing the data until the full 4096 bytes are consumed. Read on to learn more...
