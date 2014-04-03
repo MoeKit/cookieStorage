@@ -1,146 +1,153 @@
 /*jslint nomen: true, indent: 2 */
 /*global _:true, document:true */
 (function (scope) {
-  "use strict";
+    "use strict";
 
-  if (!scope) {
-    scope = {};
-  }
-
-  scope.CookieStorage = scope.CookieStorage || (function () {
-    var CookieManager;
-
-    CookieManager = (function () {
-      var set, get, remove, isSet, encode;
-
-      encode = function (s) {
-        s = s.replace(/,/g, '%2C');
-        s = s.replace(/;/g, '%3B');
-        s = s.replace(/\s/g, '%20');
-        s = s.replace(/\|/g, '%7C');
-
-        return s;
-      };
-
-      isSet = function (name) {
-        return (new RegExp("(?:^|;\\s*)" + encodeURI(name).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=")).test(document.cookie);
-      };
-
-      set = function (name, value) {
-        document.cookie = encodeURI(name) + "=" + value + ";path=/";
-      };
-
-      get = function (name) {
-        if (!isSet(name)) { return null; }
-        return decodeURIComponent(document.cookie.replace(new RegExp("(?:^|.*;\\s*)" + encodeURI(name).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=\\s*((?:[^;](?!;))*[^;]?).*"), "$1"));
-      };
-
-      remove = function (name) {
-        var oExpDate = new Date();
-        oExpDate.setDate(oExpDate.getDate() - 1);
-        document.cookie = encodeURI(name) + "=expired;expires=" + oExpDate.toGMTString() + ";path=/";
-      };
-
-      return {
-        set: set,
-        get: get,
-        remove: remove,
-        isSet: isSet,
-        encode: encode
-      };
-
-    }());
-
-    return {
-      CookieManager: CookieManager
-    };
-  }());
-
-  scope.CookieStore = scope.CookieStore || (function () {
-    var CookieManager, MAX_COOKIE_LENGTH;
-
-    MAX_COOKIE_LENGTH = 4096;
-    CookieManager = CookieStorage.CookieManager;
-    function CookieStore(namespace) {
-      this.prefix = namespace;
-      this.loadStores();
+    if (!scope) {
+        scope = {};
     }
 
-    CookieStore.prototype.persist = function () {
-      var vCookieKey,
-        vCookieVal,
-        index = 0,
-        vCookie = {},
-        store = this;
+    scope.CookieStorage = scope.CookieStorage || (function () {
+        var CookieManager;
 
-      _.each(this.kvstore, function (value, key) {
-        vCookieKey = store.prefix + index;
-        vCookieVal = vCookie[vCookieKey] || '';
+        CookieManager = (function () {
+            var set, get, remove, isSet, encode;
 
-        if (store.cookieSize(vCookieVal) + store.entrySize(key) > MAX_COOKIE_LENGTH) {
-          index += 1;
+            encode = function (s) {
+                s = s.replace(/,/g, '%2C');
+                s = s.replace(/;/g, '%3B');
+                s = s.replace(/\s/g, '%20');
+                s = s.replace(/\|/g, '%7C');
+
+                return s;
+            };
+
+            isSet = function (name) {
+                return (new RegExp("(?:^|;\\s*)" + encodeURI(name).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=")).test(document.cookie);
+            };
+
+            set = function (name, value) {
+                document.cookie = encodeURI(name) + "=" + value + ";path=/";
+            };
+
+            get = function (name) {
+                if (!isSet(name)) {
+                    return null;
+                }
+                return decodeURIComponent(document.cookie.replace(new RegExp("(?:^|.*;\\s*)" + encodeURI(name).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=\\s*((?:[^;](?!;))*[^;]?).*"), "$1"));
+            };
+
+            remove = function (name) {
+                var oExpDate = new Date();
+                oExpDate.setDate(oExpDate.getDate() - 1);
+                document.cookie = encodeURI(name) + "=expired;expires=" + oExpDate.toGMTString() + ";path=/";
+            };
+
+            return {
+                set: set,
+                get: get,
+                remove: remove,
+                isSet: isSet,
+                encode: encode
+            };
+
+        }());
+
+        return {
+            CookieManager: CookieManager
+        };
+    }());
+
+    scope.CookieStore = scope.CookieStore || (function () {
+        var CookieManager, MAX_COOKIE_LENGTH;
+
+        MAX_COOKIE_LENGTH = 4096;
+        CookieManager = CookieStorage.CookieManager;
+        function CookieStore(namespace) {
+            this.prefix = namespace;
+            this.loadStores();
         }
 
-        vCookieVal += key + '=' + CookieManager.encode(value) + '|';
-        vCookie[vCookieKey] = vCookieVal;
-      });
+        CookieStore.prototype.persist = function () {
+            var vCookieKey,
+                vCookieVal,
+                index = 0,
+                vCookie = {},
+                store = this;
 
-      store.clearStores();
+            _.each(this.kvstore, function (value, key) {
+                vCookieKey = store.prefix + index;
+                vCookieVal = vCookie[vCookieKey] || '';
 
-      _.each(vCookie, function (value, key) {
-        CookieManager.set(key, value);
-      });
-    };
+                if (store.cookieSize(vCookieVal) + store.entrySize(key) > MAX_COOKIE_LENGTH) {
+                    index += 1;
+                }
 
-    CookieStore.prototype.listStores = function () {
-      var regEx = new RegExp(this.prefix + "\\d+", "g");
-      return document.cookie.match(regEx) || [];
-    };
+                vCookieVal += key + '=' + CookieManager.encode(value) + '|';
+                vCookie[vCookieKey] = vCookieVal;
+            });
 
-    CookieStore.prototype.clearStores = function () {
-      _.each(this.listStores(), function (storeKey) {
-        CookieManager.remove(storeKey);
-      });
-    };
+            store.clearStores();
 
-    CookieStore.prototype.loadStores = function () {
-      var cookieVal, parts,
-        kvo = {};
+            _.each(vCookie, function (value, key) {
+                CookieManager.set(key, value);
+            });
+        };
 
-      _.each(this.listStores(), function (storeKey) {
-        cookieVal = CookieManager.get(storeKey);
-        _.each(cookieVal.split('|'), function (pair) {
-          parts = pair.split("=");
-          if (parts[0]) {
-            kvo[parts[0]] = parts[1];
-          }
-        });
-      });
+        CookieStore.prototype.listStores = function () {
+            var regEx = new RegExp(this.prefix + "\\d+", "g");
+            return document.cookie.match(regEx) || [];
+        };
 
-      this.kvstore = kvo;
-    };
+        CookieStore.prototype.clearStores = function () {
+            _.each(this.listStores(), function (storeKey) {
+                CookieManager.remove(storeKey);
+            });
+        };
 
-    /**
-     * k=val
-     * k.length + '='.length + kvstore[k].length
-     */
-    CookieStore.prototype.entrySize = function (k) {
-      return k.length + 1 + (this.kvstore[k] ? CookieManager.encode(this.kvstore[k]).length : 0);
-    };
+        CookieStore.prototype.loadStores = function () {
+            var cookieVal, parts,
+                kvo = {};
 
-    CookieStore.prototype.cookieSize = function (value) {
-      return this.prefix.length + 2 + (value ? CookieManager.encode(value).length : 0);
-    };
+            _.each(this.listStores(), function (storeKey) {
+                cookieVal = CookieManager.get(storeKey);
+                _.each(cookieVal.split('|'), function (pair) {
+                    parts = pair.split("=");
+                    if (parts[0]) {
+                        kvo[parts[0]] = parts[1];
+                    }
+                });
+            });
 
-    CookieStore.prototype.put = function (k, v) {
-      this.kvstore[k] = v;
-      this.persist();
-    };
+            this.kvstore = kvo;
+        };
 
-    CookieStore.prototype.get = function (k) {
-      return this.kvstore[k];
-    };
+        /**
+         * k=val
+         * k.length + '='.length + kvstore[k].length
+         */
+        CookieStore.prototype.entrySize = function (k) {
+            return k.length + 1 + (this.kvstore[k] ? CookieManager.encode(this.kvstore[k]).length : 0);
+        };
 
-    return CookieStore;
-  })();
+        CookieStore.prototype.cookieSize = function (value) {
+            return this.prefix.length + 2 + (value ? CookieManager.encode(value).length : 0);
+        };
+
+        CookieStore.prototype.put = function (k, v) {
+            this.kvstore[k] = v;
+            this.persist();
+        };
+
+        CookieStore.prototype.get = function (k) {
+            return this.kvstore[k];
+        };
+
+        CookieStore.prototype.remove = function (k) {
+            delete(this.kvstore[k]);
+            this.persist();
+        };
+
+        return CookieStore;
+    })();
 }(this));
