@@ -3,6 +3,12 @@
 (function (scope) {
     "use strict";
 
+    var each = function (object, callback) {
+        for (var i in object) {
+            callback(i, object[i]);
+        }
+    };
+
     if (!scope) {
         scope = {};
     }
@@ -75,7 +81,7 @@
                 vCookie = {},
                 store = this;
 
-            _.each(this.kvstore, function (value, key) {
+            each(this.kvstore, function (value, key) {
                 vCookieKey = store.prefix + index;
                 vCookieVal = vCookie[vCookieKey] || '';
 
@@ -89,7 +95,7 @@
 
             store.clearStores();
 
-            _.each(vCookie, function (value, key) {
+            each(vCookie, function (value, key) {
                 CookieManager.set(key, value);
             });
         };
@@ -100,7 +106,7 @@
         };
 
         CookieStore.prototype.clearStores = function () {
-            _.each(this.listStores(), function (storeKey) {
+            each(this.listStores(), function (storeKey) {
                 CookieManager.remove(storeKey);
             });
         };
@@ -109,9 +115,9 @@
             var cookieVal, parts,
                 kvo = {};
 
-            _.each(this.listStores(), function (storeKey) {
+            each(this.listStores(), function (storeKey) {
                 cookieVal = CookieManager.get(storeKey);
-                _.each(cookieVal.split('|'), function (pair) {
+                each(cookieVal.split('|'), function (pair) {
                     parts = pair.split("=");
                     if (parts[0]) {
                         kvo[parts[0]] = parts[1];
