@@ -1,3 +1,4 @@
+console.log(_);
 describe('cookie-storage', function () {
     var cs = new CookieStore('cskv_'),
         cm = CookieStorage.CookieManager,
@@ -39,6 +40,10 @@ describe('cookie-storage', function () {
     };
 
     beforeEach(function () {
+        clearCookies();
+    });
+
+    afterEach(function(){
         clearCookies();
     });
 

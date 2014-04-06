@@ -1,25 +1,39 @@
 /*jslint nomen: true, indent: 2 */
 /*global _:true, document:true */
-(function (scope) {
+(function(scope) {
     "use strict";
 
-    var each = function (object, callback) {
-        for (var i in object) {
-            callback(i, object[i]);
+    var each = function(obj, iterator, context) {
+        var ArrayProto = Array.prototype;
+        var nativeForEach = ArrayProto.forEach;
+        var breaker = {};
+        if (obj == null) return obj;
+        if (nativeForEach && obj.forEach === nativeForEach) {
+            obj.forEach(iterator, context);
+        } else if (obj.length === +obj.length) {
+            for (var i = 0, length = obj.length; i < length; i++) {
+                if (iterator.call(context, obj[i], i, obj) === breaker) return;
+            }
+        } else {
+            var keys = _.keys(obj);
+            for (var i = 0, length = keys.length; i < length; i++) {
+                if (iterator.call(context, obj[keys[i]], keys[i], obj) === breaker) return;
+            }
         }
+        return obj;
     };
 
     if (!scope) {
         scope = {};
     }
 
-    scope.CookieStorage = scope.CookieStorage || (function () {
+    scope.CookieStorage = scope.CookieStorage || (function() {
         var CookieManager;
 
-        CookieManager = (function () {
+        CookieManager = (function() {
             var set, get, remove, isSet, encode;
 
-            encode = function (s) {
+            encode = function(s) {
                 s = s.replace(/,/g, '%2C');
                 s = s.replace(/;/g, '%3B');
                 s = s.replace(/\s/g, '%20');
@@ -28,22 +42,30 @@
                 return s;
             };
 
-            isSet = function (name) {
+            isSet = function(name) {
                 return (new RegExp("(?:^|;\\s*)" + encodeURI(name).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=")).test(document.cookie);
             };
 
-            set = function (name, value) {
-                document.cookie = encodeURI(name) + "=" + value + ";path=/";
+            set = function(name, value, option) {
+                var cookie = encodeURI(name) + "=" + value + ";path=/";
+                if (option && option.domain) {
+                    cookie += ';domain=' + option.domain;
+                }
+                if (option && option.expires) {
+                    var expires = new Date((+new Date()) + option.expires * 24 * 60 * 60 * 1000).toGMTString();
+                    cookie += ';expires=' + expires;
+                }
+                document.cookie = cookie;
             };
 
-            get = function (name) {
+            get = function(name) {
                 if (!isSet(name)) {
                     return null;
                 }
                 return decodeURIComponent(document.cookie.replace(new RegExp("(?:^|.*;\\s*)" + encodeURI(name).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=\\s*((?:[^;](?!;))*[^;]?).*"), "$1"));
             };
 
-            remove = function (name) {
+            remove = function(name) {
                 var oExpDate = new Date();
                 oExpDate.setDate(oExpDate.getDate() - 1);
                 document.cookie = encodeURI(name) + "=expired;expires=" + oExpDate.toGMTString() + ";path=/";
@@ -64,24 +86,26 @@
         };
     }());
 
-    scope.CookieStore = scope.CookieStore || (function () {
+    scope.CookieStore = scope.CookieStore || (function() {
         var CookieManager, MAX_COOKIE_LENGTH;
 
         MAX_COOKIE_LENGTH = 4096;
         CookieManager = CookieStorage.CookieManager;
-        function CookieStore(namespace) {
+
+        function CookieStore(namespace, cookieOption) {
             this.prefix = namespace;
+            this.cookieOption = cookieOption;
             this.loadStores();
         }
 
-        CookieStore.prototype.persist = function () {
+        CookieStore.prototype.persist = function() {
             var vCookieKey,
                 vCookieVal,
                 index = 0,
                 vCookie = {},
                 store = this;
 
-            each(this.kvstore, function (value, key) {
+            each(this.kvstore, function(value, key) {
                 vCookieKey = store.prefix + index;
                 vCookieVal = vCookie[vCookieKey] || '';
 
@@ -95,29 +119,29 @@
 
             store.clearStores();
 
-            each(vCookie, function (value, key) {
-                CookieManager.set(key, value);
+            each(vCookie, function(value, key) {
+                CookieManager.set(key, value, store.cookieOption);
             });
         };
 
-        CookieStore.prototype.listStores = function () {
+        CookieStore.prototype.listStores = function() {
             var regEx = new RegExp(this.prefix + "\\d+", "g");
             return document.cookie.match(regEx) || [];
         };
 
-        CookieStore.prototype.clearStores = function () {
-            each(this.listStores(), function (storeKey) {
+        CookieStore.prototype.clearStores = function() {
+            each(this.listStores(), function(storeKey) {
                 CookieManager.remove(storeKey);
             });
         };
 
-        CookieStore.prototype.loadStores = function () {
+        CookieStore.prototype.loadStores = function() {
             var cookieVal, parts,
                 kvo = {};
 
-            each(this.listStores(), function (storeKey) {
+            each(this.listStores(), function(storeKey) {
                 cookieVal = CookieManager.get(storeKey);
-                each(cookieVal.split('|'), function (pair) {
+                each(cookieVal.split('|'), function(pair) {
                     parts = pair.split("=");
                     if (parts[0]) {
                         kvo[parts[0]] = parts[1];
@@ -132,24 +156,24 @@
          * k=val
          * k.length + '='.length + kvstore[k].length
          */
-        CookieStore.prototype.entrySize = function (k) {
+        CookieStore.prototype.entrySize = function(k) {
             return k.length + 1 + (this.kvstore[k] ? CookieManager.encode(this.kvstore[k]).length : 0);
         };
 
-        CookieStore.prototype.cookieSize = function (value) {
+        CookieStore.prototype.cookieSize = function(value) {
             return this.prefix.length + 2 + (value ? CookieManager.encode(value).length : 0);
         };
 
-        CookieStore.prototype.put = function (k, v) {
+        CookieStore.prototype.put = function(k, v) {
             this.kvstore[k] = v;
             this.persist();
         };
 
-        CookieStore.prototype.get = function (k) {
+        CookieStore.prototype.get = function(k) {
             return this.kvstore[k];
         };
 
-        CookieStore.prototype.remove = function (k) {
+        CookieStore.prototype.remove = function(k) {
             delete(this.kvstore[k]);
             this.persist();
         };
