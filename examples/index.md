@@ -3,7 +3,7 @@
 ---
 
 ````javascript
-seajs.use('cookieStore', function(cookieStore){
+seajs.use('index', function(cookieStore){
      var test = new cookieStore('cskv_');
      console.log(test);
      test.remove('aa');

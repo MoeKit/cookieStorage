@@ -1,7 +1,6 @@
 {
-  "family": "moe",
-  "name": "cookieStore",
-  "version": "0.0.8",
+  "name": "cookie-store",
+  "version": "0.0.9",
   "description": "cookieStore helper",
   "homepage": "https://github.com/airyland/seedit.cookieStorage",
   "author": "airyland",
@@ -18,9 +17,15 @@
   "keywords": [],
   "licenses": "MIT",
   "spm": {
-    "output": ["cookieStore.js"],
+    "output": [
+      "index.js"
+    ],
     "alias": {},
     "devAlias": {},
-    "engines": {}
+    "engines": {},
+    "devDependencies": {
+      "underscore": "1.6.0",
+      "expect": "0.3.1"
+    }
   }
 }

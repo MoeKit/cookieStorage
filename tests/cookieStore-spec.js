@@ -36,7 +36,7 @@ var each = function (obj, iterator, context) {
     return obj;
 };
 
-var CookieStorage =(function () {
+var CookieStorage = (function () {
     var CookieManager;
 
     CookieManager = (function () {
@@ -92,157 +92,156 @@ var CookieStorage =(function () {
     }());
 
 
-     return CookieManager
+    return CookieManager
 
 }());
 
-define(function(require) {
 
-  var CookieStore = require('cookieStore');
-  var expect = require('expect');
-  var _ = require('gallery/underscore/1.6.0/underscore');
-    describe('cookie-storage', function () {
-        var cs = new CookieStore('cskv_'),
-            cm = CookieStorage,
-            clearCookies,
-            getRandomArbitary,
-            randomWords;
+var CookieStore = require('index');
+var expect = require('expect');
+var _ = require('underscore');
+describe('cookie-storage', function () {
+    var cs = new CookieStore('cskv_'),
+        cm = CookieStorage,
+        clearCookies,
+        getRandomArbitary,
+        randomWords;
 
-        clearCookies = function () {
-            each(document.cookie.split(';'), function (cookie) {
-                var name = cookie.split('='),
-                    oExpDate = new Date();
+    clearCookies = function () {
+        each(document.cookie.split(';'), function (cookie) {
+            var name = cookie.split('='),
+                oExpDate = new Date();
 
-                oExpDate.setDate(oExpDate.getDate() - 1);
-                document.cookie = escape(name[0]) + "=; expires=" + oExpDate.toGMTString() + "; path=/";
-            });
-        };
+            oExpDate.setDate(oExpDate.getDate() - 1);
+            document.cookie = escape(name[0]) + "=; expires=" + oExpDate.toGMTString() + "; path=/";
+        });
+    };
 
-        getRandomArbitary = function (min, max) {
-            return Math.floor(Math.random() * (max - min) + min);
-        };
+    getRandomArbitary = function (min, max) {
+        return Math.floor(Math.random() * (max - min) + min);
+    };
 
-        randomWords = function (count) {
-            var letters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
-                minSize = 3,
-                maxSize = 16,
-                result = '';
+    randomWords = function (count) {
+        var letters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
+            minSize = 3,
+            maxSize = 16,
+            result = '';
 
-            _(count).times(function (n) {
-                _(getRandomArbitary(minSize, maxSize)).times(function () {
-                    result += letters[getRandomArbitary(0, letters.length)];
-                });
-
-                if (n < count - 1) {
-                    result += ' ';
-                }
+        _(count).times(function (n) {
+            _(getRandomArbitary(minSize, maxSize)).times(function () {
+                result += letters[getRandomArbitary(0, letters.length)];
             });
 
-            return result;
-        };
-
-        beforeEach(function () {
-            clearCookies();
+            if (n < count - 1) {
+                result += ' ';
+            }
         });
 
-        afterEach(function(){
-            clearCookies();
+        return result;
+    };
+
+    beforeEach(function () {
+        clearCookies();
+    });
+
+    afterEach(function () {
+        clearCookies();
+    });
+
+    /*
+     * CookieStorage.CookieManger
+     */
+    describe('cookie-manager', function () {
+        it('should return null', function () {
+            expect(cm.get('does_not_exist')).to.be(null);
         });
 
-        /*
-         * CookieStorage.CookieManger
-         */
-        describe('cookie-manager', function () {
-            it('should return null', function () {
-                expect(cm.get('does_not_exist')).to.be(null);
-            });
+        it('should get what was just set', function () {
+            var varName = 'shouldEquals',
+                varValue = 'a test string ? ; = ,';
+            cm.set(varName, cm.encode(varValue));
 
-            it('should get what was just set', function () {
-                var varName = 'shouldEquals',
-                    varValue = 'a test string ? ; = ,';
-                cm.set(varName, cm.encode(varValue));
-
-                expect(cm.get(varName)).to.be(varValue);
-            });
-
-            it('should remove the cookie', function () {
-                var name = "cookieName",
-                    value = "value";
-
-                cm.set(name, value);
-                expect(cm.get(name)).to.be(value);
-
-                cm.remove(name);
-                expect(cm.get(name)).to.be(null);
-            });
-
-            it('should pass when set, fail when not set', function () {
-                var name = "cookieName",
-                    value = "value";
-
-                cm.set(name, value);
-                expect(cm.isSet(name)).to.be(true);
-
-                cm.remove(name);
-                expect(cm.isSet(name)).to.be(false);
-            });
+            expect(cm.get(varName)).to.be(varValue);
         });
 
-        /*
-         * CookieStorage
-         */
-        it('should have a cookie size of 0', function () {
-            expect(document.cookie.length).to.be(0);
-        });
-
-        it('should "get" same data that was "put"', function () {
+        it('should remove the cookie', function () {
             var name = "cookieName",
                 value = "value";
 
-            cs.put(name, value);
-            expect(cs.get(name)).to.be(value);
+            cm.set(name, value);
+            expect(cm.get(name)).to.be(value);
+
+            cm.remove(name);
+            expect(cm.get(name)).to.be(null);
         });
 
-        it('should have an expected length', function () {
-            var name = "name",
-                value = "her royal majesty queen elizabeth ii";
-            cs.put(name, value);
-            expect(cs.entrySize('name')).to.be(51);
-        });
-
-        it('should have a no cookie stores', function () {
-            cs.clearStores();
-            cs.loadStores();
-            expect(cs.listStores().length).to.be(0);
-        });
-
-        it('should have a single cookie store', function () {
+        it('should pass when set, fail when not set', function () {
             var name = "cookieName",
                 value = "value";
-            cs.loadStores();
-            expect(cs.listStores().length).to.be(0);
-            cs.put(name, value);
-            expect(cs.listStores().length).to.be(1);
-        });
 
-        it('should remove the specified cookie', function () {
-            cs.put('test', 'testvalue');
-            expect(cs.get('test')).to.be('testvalue');
-            cs.remove('test');
-            expect(cs.get('test')).to.be(undefined);
-        });
+            cm.set(name, value);
+            expect(cm.isSet(name)).to.be(true);
 
-        it('should span multiple cookie stores', function () {
-            var numEntries = 80;
-
-            cs.loadStores();
-
-            _(numEntries).times(function () {
-                cs.put(randomWords(1), randomWords(getRandomArbitary(1, 11)));
-            });
-
-            expect(cs.listStores().length > 1).to.be(true);
+            cm.remove(name);
+            expect(cm.isSet(name)).to.be(false);
         });
     });
 
+    /*
+     * CookieStorage
+     */
+    it('should have a cookie size of 0', function () {
+        expect(document.cookie.length).to.be(0);
+    });
+
+    it('should "get" same data that was "put"', function () {
+        var name = "cookieName",
+            value = "value";
+
+        cs.put(name, value);
+        expect(cs.get(name)).to.be(value);
+    });
+
+    it('should have an expected length', function () {
+        var name = "name",
+            value = "her royal majesty queen elizabeth ii";
+        cs.put(name, value);
+        expect(cs.entrySize('name')).to.be(51);
+    });
+
+    it('should have a no cookie stores', function () {
+        cs.clearStores();
+        cs.loadStores();
+        expect(cs.listStores().length).to.be(0);
+    });
+
+    it('should have a single cookie store', function () {
+        var name = "cookieName",
+            value = "value";
+        cs.loadStores();
+        expect(cs.listStores().length).to.be(0);
+        cs.put(name, value);
+        expect(cs.listStores().length).to.be(1);
+    });
+
+    it('should remove the specified cookie', function () {
+        cs.put('test', 'testvalue');
+        expect(cs.get('test')).to.be('testvalue');
+        cs.remove('test');
+        expect(cs.get('test')).to.be(undefined);
+    });
+
+    it('should span multiple cookie stores', function () {
+        var numEntries = 80;
+
+        cs.loadStores();
+
+        _(numEntries).times(function () {
+            cs.put(randomWords(1), randomWords(getRandomArbitary(1, 11)));
+        });
+
+        expect(cs.listStores().length > 1).to.be(true);
+    });
 });
+
+
