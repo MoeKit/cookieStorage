@@ -1,31 +1,29 @@
 {
-  "name": "cookie-store",
-  "version": "0.0.9",
-  "description": "cookieStore helper",
-  "homepage": "https://github.com/airyland/seedit.cookieStorage",
-  "author": "airyland",
-  "maintainers": [
-    "airyland"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/airyland/seedit.cookieStorage.git"
-  },
-  "bugs": {
-    "url": ""
-  },
-  "keywords": [],
-  "licenses": "MIT",
-  "spm": {
-    "output": [
-      "index.js"
+    "name": "cookie-store",
+    "version": "0.0.9",
+    "description": "cookieStore helper",
+    "homepage": "https://github.com/MoeKit/cookieStorage.git",
+    "author": "airyland",
+    "maintainers": [
+        "airyland"
     ],
-    "alias": {},
-    "devAlias": {},
-    "engines": {},
-    "devDependencies": {
-      "underscore": "1.6.0",
-      "expect": "0.3.1"
+    "repository": {
+        "type": "git",
+        "url": "git@github.com:MoeKit/cookieStorage.git"
+    },
+    "bugs": {
+        "url": ""
+    },
+    "keywords": [],
+    "licenses": "MIT",
+    "spm": {
+        "main": "index.js",
+        "alias": {},
+        "devAlias": {},
+        "engines": {},
+        "devDependencies": {
+            "underscore": "1.6.0",
+            "expect": "0.3.1"
+        }
     }
-  }
 }

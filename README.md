@@ -2,6 +2,9 @@
 
 ---
 
+[![Build Status](https://travis-ci.org/MoeKit/cookieStorage.svg?branch=moe)](https://travis-ci.org/MoeKit/cookieStorage)
+[![Coverage Status](https://coveralls.io/repos/MoeKit/cookieStorage/badge.png?branch=moe)](https://coveralls.io/r/MoeKit/cookieStorage?branch=moe)
+
 避免浪费多个cookie名，多个前端`cookie`值保存到一个cookie里
 
 ---
