@@ -2,8 +2,8 @@
 
 ---
 
-[![Build Status](https://travis-ci.org/MoeKit/cookieStorage.svg?branch=moe)](https://travis-ci.org/MoeKit/cookieStorage)
-[![Coverage Status](https://coveralls.io/repos/MoeKit/cookieStorage/badge.png?branch=moe)](https://coveralls.io/r/MoeKit/cookieStorage?branch=moe)
+[![Build Status](https://travis-ci.org/MoeKit/cookieStorage.svg)](https://travis-ci.org/MoeKit/cookieStorage)
+[![Coverage Status](https://coveralls.io/repos/MoeKit/cookieStorage/badge.png)](https://coveralls.io/r/MoeKit/cookieStorage?branch=moe)
 
 ---
 
