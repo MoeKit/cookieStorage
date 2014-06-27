@@ -1,4 +1,4 @@
-# cookieStore
+# cookie-store
 
 ---
 
@@ -16,17 +16,20 @@
 站内使用，请手动设置cookie保存域名，全域为 `seedit.com`
 
 ````javascript
-var test = new cookieStore('fe_',{
-    domain: 'seedit.com',
-    expires: 365
+define(function(require){
+    var cookieStore = require('index');
+    var test = new cookieStore('fe_',{
+        domain: 'seedit.com',
+        expires: 365
+    });
+    // 删除
+    test.remove('aa');
+    // 获取
+    console.log(test.get('aa'));
+    // 保存
+    test.put('aa','bb');
+    console.log(test.get('aa'));
 });
-// 删除
-test.remove('aa');
-// 获取
-console.log(test.get('aa'));
-// 保存
-test.put('aa','bb');
-console.log(test.get('aa'));
 ````
 
 ## 注意
