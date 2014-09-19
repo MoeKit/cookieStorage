@@ -44,6 +44,7 @@ var CookieStorage = CookieStorage || (function () {
         var set, get, remove, isSet, encode;
 
         encode = function (s) {
+            s = s +''; // convert to string
             s = s.replace(/,/g, '%2C');
             s = s.replace(/;/g, '%3B');
             s = s.replace(/\s/g, '%20');

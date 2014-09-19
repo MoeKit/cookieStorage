@@ -21,6 +21,7 @@
         "alias": {},
         "devAlias": {},
         "engines": {},
+        "test":"./test/test.js",
         "devDependencies": {
             "underscore": "1.6.0",
             "expect": "0.3.1"
