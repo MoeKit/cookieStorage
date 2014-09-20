@@ -10,6 +10,10 @@ before_script:
   - node_modules/spm/bin/spm-install
 
 script:
+  - ls
+  - cd _site
+  - ls
+  - cd ..
   - cat _site/tests/runner.html
   - node_modules/spm/bin/spm-test
 
