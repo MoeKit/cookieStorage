@@ -10,12 +10,11 @@ before_script:
   - node_modules/spm/bin/spm-install
 
 script:
+  - node_modules/spm/bin/spm-test
+  - cat _site/tests/runner.html
   - ls
   - cd _site
   - ls
-  - cd ..
-  - cat _site/tests/runner.html
-  - node_modules/spm/bin/spm-test
 
 after_success:
   - node_modules/spm/bin/spm-test --coveralls | node_modules/.bin/coveralls
