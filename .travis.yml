@@ -11,10 +11,6 @@ before_script:
 
 script:
   - node_modules/spm/bin/spm-test
-  - cat _site/tests/runner.html
-  - ls
-  - cd _site
-  - ls
-
+  - curl http://127.0.0.1:8015/tests/runner.html
 after_success:
   - node_modules/spm/bin/spm-test --coveralls | node_modules/.bin/coveralls
