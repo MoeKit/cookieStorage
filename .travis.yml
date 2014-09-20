@@ -4,12 +4,13 @@ node_js:
   - "0.10"
 
 install:
-  - npm install spm coveralls
+  - npm install spmjs/spm coveralls
 
 before_script:
   - node_modules/spm/bin/spm-install
 
 script:
+  - cat _site/tests/runner.html
   - node_modules/spm/bin/spm-test
 
 after_success:
